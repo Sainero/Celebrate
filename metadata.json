@@ -1,0 +1,6 @@
+{
+  "name": "Поздравление для Димы",
+  "description": "Красивое интерактивное письмо с извинениями и поздравлением на свадьбу",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
