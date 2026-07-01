@@ -106,6 +106,7 @@ export default function Game({ onBack }: { onBack: () => void }) {
   const [highScore, setHighScore] = useState(0);
 
   const requestRef = useRef<number>();
+  const lastTimeRef = useRef<number>(0);
   const keys = useRef<{ left: boolean; right: boolean }>({ left: false, right: false });
   const touchState = useRef<{ left: boolean; right: boolean }>({ left: false, right: false });
 
@@ -265,11 +266,16 @@ export default function Game({ onBack }: { onBack: () => void }) {
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
 
-    const update = () => {
+    const update = (time: number) => {
       if (gameState !== 'playing') return;
       const state = stateRef.current;
       const { player, platforms, collectibles, particles, camera } = state;
-      state.frames++;
+      let dtFactor = 1;
+      if (lastTimeRef.current) {
+        dtFactor = Math.min(((time - lastTimeRef.current) / 1000) * 60, 3);
+      }
+      lastTimeRef.current = time;
+      state.frames += dtFactor;
 
       const progress = Math.min(1, Math.max(0, -player.pos.y / WIN_HEIGHT));
       const currentGravity = GRAVITY + (progress * 0.25);
@@ -284,17 +290,17 @@ export default function Game({ onBack }: { onBack: () => void }) {
         player.vel.x = MOVE_SPEED;
         player.facingRight = true;
       } else {
-        player.vel.x *= 0.8;
+        player.vel.x *= Math.pow(0.8, dtFactor);
       }
 
-      player.pos.x += player.vel.x;
+      player.pos.x += player.vel.x * dtFactor;
 
       if (player.pos.x > LOGICAL_WIDTH) player.pos.x = -player.width;
       if (player.pos.x < -player.width) player.pos.x = LOGICAL_WIDTH;
 
-      player.vel.y += currentGravity;
+      player.vel.y += currentGravity * dtFactor;
       if (player.vel.y > MAX_FALL_SPEED) player.vel.y = MAX_FALL_SPEED;
-      player.pos.y += player.vel.y;
+      player.pos.y += player.vel.y * dtFactor;
 
       if (player.vel.y > 0) {
         for (let i = 0; i < platforms.length; i++) {
@@ -305,7 +311,7 @@ export default function Game({ onBack }: { onBack: () => void }) {
             player.pos.x + player.width - 10 > p.pos.x &&
             player.pos.x + 10 < p.pos.x + p.width &&
             player.pos.y + player.height > p.pos.y &&
-            player.pos.y + player.height < p.pos.y + p.height + player.vel.y
+            player.pos.y + player.height < p.pos.y + p.height + player.vel.y * dtFactor
           ) {
             player.pos.y = p.pos.y - player.height;
 
@@ -344,11 +350,11 @@ export default function Game({ onBack }: { onBack: () => void }) {
 
       for (let p of platforms) {
         if (p.type === 'moving' && !p.broken) {
-          p.pos.x += p.vx;
+          p.pos.x += p.vx * dtFactor;
           if (p.pos.x > LOGICAL_WIDTH - p.width || p.pos.x < 0) p.vx *= -1;
         }
         if (p.broken && p.opacity > 0) {
-          p.opacity -= 0.1;
+          p.opacity -= 0.1 * dtFactor;
         }
       }
 
@@ -372,11 +378,11 @@ export default function Game({ onBack }: { onBack: () => void }) {
 
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
-        p.pos.x += p.vel.x;
-        p.pos.y += p.vel.y;
-        p.vel.y += GRAVITY * 0.5;
-        p.rotation += p.vRot;
-        p.life++;
+        p.pos.x += p.vel.x * dtFactor;
+        p.pos.y += p.vel.y * dtFactor;
+        p.vel.y += GRAVITY * 0.5 * dtFactor;
+        p.rotation += p.vRot * dtFactor;
+        p.life += dtFactor;
         if (p.life >= p.maxLife) particles.splice(i, 1);
       }
 
@@ -385,7 +391,7 @@ export default function Game({ onBack }: { onBack: () => void }) {
         state.trail.push({ x: player.pos.x + player.width/2, y: player.pos.y + player.height/2, life: 1 });
       }
       for (let i = state.trail.length - 1; i >= 0; i--) {
-        state.trail[i].life -= 0.08;
+        state.trail[i].life -= 0.08 * dtFactor;
         if (state.trail[i].life <= 0) state.trail.splice(i, 1);
       }
 
