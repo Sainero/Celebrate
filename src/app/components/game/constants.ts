@@ -2,11 +2,11 @@ import { EasterEgg } from './types';
 
 export const LOGICAL_WIDTH = 600;
 export const LOGICAL_HEIGHT = 800;
-export const GRAVITY = 0.2;
+export const GRAVITY = 0.16;
 export const JUMP_FORCE = -8.5;
 export const SPRING_FORCE = -14;
-export const MOVE_SPEED = 4.5;
-export const MAX_FALL_SPEED = 10;
+export const MOVE_SPEED = 3.5;
+export const MAX_FALL_SPEED = 8;
 export const PLATFORM_WIDTH = 100;
 export const PLATFORM_HEIGHT = 16;
 export const PLAYER_SIZE = 48;
