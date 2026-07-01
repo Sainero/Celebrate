@@ -1,6 +1,0 @@
-{
-  "name": "Поздравление на свадьбу",
-  "description": "Красивое интерактивное письмо и поздравлением на свадьбу",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
